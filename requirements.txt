@@ -1,0 +1,9 @@
+pybaseball
+pandas
+numpy
+sqlalchemy
+python-dotenv
+psycopg2-binary
+scikit-learn
+jupyter
+pyarrow
