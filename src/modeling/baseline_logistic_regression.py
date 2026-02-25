@@ -29,7 +29,10 @@ if __name__ == "__main__":
     pd.set_option('display.max_columns', None)
     # Section 1: Creating train/test splits
     df = load_modeling_extract()
-    train_df, test_df = time_split(df)
+    train_df, test_df = time_split(df,
+                                   train_start='2021-01-01',
+                                   train_end='2024-12-31',
+                                   test_start='2025-01-01')
 
     # train/test splits
     X_train = train_df[NUMERIC_VARIABLES + CATEGORICAL_VARIABLES]
@@ -68,7 +71,7 @@ if __name__ == "__main__":
     )
 
     model = Pipeline(steps=[('preprocessing', preprocessor),
-                            ('model', LogisticRegression(max_iter=1000, solver='lbfgs'))])
+                            ('model', LogisticRegression(max_iter=1000, solver='lbfgs', random_state=100))])
 
     model.fit(X_train, y_train)
     pred_proba = model.predict_proba(X_test)[:, 1]
@@ -76,6 +79,7 @@ if __name__ == "__main__":
 
     # predicted hit rate vs. actual hit rate
     print(f"Actual Hit Rate: {y_test.mean().round(3)}")
+    print(f"Expected Hit Rate: {pred_proba.mean().round(3)}")
     print(f"Predicted Hit Rate @.50 Threshold: {(pred_proba >= .50).mean().round(3)}")
 
     # confusion matrix
@@ -97,7 +101,3 @@ if __name__ == "__main__":
     print(f"Accuracy: {round(accuracy, 3)}\nPrecision: {round(precision, 3)}\nRecall: {round(recall, 3)}\n"
           f"Specificity: {round(specificity, 3)}\nF1: {round(f1, 3)}\nROC AUC: {round(roc_auc, 3)}\n"
           f"Average Precision: {round(ap_score, 3)}")
-
-# Section 3: Improving upon baseline model
-
-

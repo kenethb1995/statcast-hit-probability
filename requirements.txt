@@ -1,9 +1,11 @@
-pybaseball
-pandas
+pybaseball~=2.2.7
+pandas~=2.3.3
 numpy
-sqlalchemy
-python-dotenv
+sqlalchemy~=2.0.45
+python-dotenv~=1.2.1
 psycopg2-binary
-scikit-learn
+scikit-learn~=1.7.2
 jupyter
 pyarrow
+
+matplotlib~=3.10.8
