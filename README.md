@@ -1,6 +1,6 @@
 Model will answer one precise question:
 At the moment of contact, based only on information available then,
-what is the probabilty this batted ball becomes a hit?
+what is the probability this batted ball becomes a hit?
 
 Schema (Table Creation)
 ==
@@ -53,9 +53,23 @@ Run after the modeling view has been created and prior to time-based train/test 
 Training and Testing DataFrames
 ==
 Creation of training and testing DataFrames is handled by `split.py`
-- Observations on or before December 31, 2024 used to create training DataFrame.
-- Observations on or after January 1, 2025 used to create testing DataFrame.
+- Observations on or before December 31, 2024 used to create Training DataFrame.
+- Observations on or after January 1, 2025 used to create Testing DataFrame.
 - Does not use random sampling to create train/test DataFrames in order to mirror real-world deployment, where models are trained on past seasons and evaluated on future seasons.
 - Does not handle transformation or feature engineering.
 
 Run this script after retrieval and validation of the predictive modeling dataset.
+
+
+A/B Feature Experimental Comparison
+==
+Feature comparison handled by `tracking_era_model_comparison.py`
+- Uses time-based splits to create training and testing DataFrames
+- Observations between July 14, 2023, and December 31, 2024 (inclusive) are used to create training DataFrame.
+- Observations on or after January 1, 2025, are used to create testing DataFrame.
+- Both models receive identical rows by omitting observations with missing values across any features used in the comparison.
+- Predicted hits are determined using a fixed threshold of 0.50.
+- Does not handle feature engineering, threshold optimization, hyperparameter tuning, or model selection.
+- Produces summary table directly comparing models based on predicted hits at fixed threshold, Accuracy, Precision, Recall, Specificity, F1, ROC AUC, and Average Precision.
+
+Run this script after implementing and validating baseline models.
