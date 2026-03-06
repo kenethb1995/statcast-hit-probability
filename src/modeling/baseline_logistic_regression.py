@@ -1,3 +1,17 @@
+"""
+1.Purpose: This script produces a baseline logistic regression model with baseline contact variables and serves
+as the reference model.
+
+2.Scope: Utilizes time-based split for creation of training/testing DataFrames. Training DataFrame consists of
+observations recorded between January 1, 2021, and December 31, 2024, and testing observations recorded on or
+after January 1, 2025. Applies preprocessing pipelines including imputation, scaling, and encoding prior to
+logistic regression training.
+
+3.Non-Goal: Does not aim to provide the best model possible. No threshold optimization or hyperparameter tuning.
+
+4.Usage: Run after proper implementation of extract.py and split.py.
+"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.compose import ColumnTransformer
@@ -42,8 +56,8 @@ if __name__ == "__main__":
     y_test = test_df['is_hit']
 
     # sanity checks
-    # print(f"Training DataFrame Shape: {X_train.shape}")
-    # print(f"Testing DataFrame Shape: {X_test.shape}")
+    print(f"Training DataFrame Shape: {X_train.shape}")
+    print(f"Testing DataFrame Shape: {X_test.shape}")
 
     assert "is_hit" not in X_train.columns and "game_date" not in X_train.columns and \
            "batted_ball_id" not in X_train.columns, "Training DataFrame includes unexpected columns"
@@ -87,7 +101,10 @@ if __name__ == "__main__":
     class_labels = ['Not Hit', 'Hit']
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_labels)
     disp.plot(cmap=plt.cm.Greens, values_format='d')
-    #plt.show()
+    plt.title("Confusion Matrix For Baseline Logistic Regression Model With Fixed Threshold=0.50",
+              pad=20,
+              loc="center")
+    plt.show()
 
     # relevant model performance metrics
     accuracy = accuracy_score(y_test, predictions)

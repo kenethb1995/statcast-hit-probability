@@ -53,17 +53,38 @@ Run after the modeling view has been created and prior to time-based train/test 
 Training and Testing DataFrames
 ==
 Creation of training and testing DataFrames is handled by `split.py`
-- Observations on or before December 31, 2024 used to create Training DataFrame.
-- Observations on or after January 1, 2025 used to create Testing DataFrame.
+- Observations on or before December 31, 2024, used to create Training DataFrame.
+- Observations on or after January 1, 2025, used to create Testing DataFrame.
 - Does not use random sampling to create train/test DataFrames in order to mirror real-world deployment, where models are trained on past seasons and evaluated on future seasons.
 - Does not handle transformation or feature engineering.
 
 Run this script after retrieval and validation of the predictive modeling dataset.
 
+Baseline Logistic Regression Model 
+==
+Creation of the baseline logistic regression model is handled by `baseline_logistic_regression.py`
+- Trains logistic regression model using baseline Statcast features plate_x, plate_z, launch_speed, launch_angle, bb_type, stand, and p_throws.
+- Uses time-based split where training observations occur between January 1, 2021, and December 31, 2024, and testing observations occur on or after January 1, 2025.
+- Applies preprocessing pipelines including imputation, scaling of numeric features, and one-hot encoding for categorical features.
+- Uses a fixed threshold of 0.50 for predicted hits.
+- Serves as the baseline model for subsequent bat-tracking feature comparison experiments.
+
+Run this script after successful predictive model dataset retrieval and train/test split.
+
+Bat-Tracking Logistic Regression Model
+==
+Creation of the bat-tracking logistic regression model is handled by `bat_tracking_logistic_regression.py`
+- Trains logistic regression model using the same baseline Statcast features with inclusion of bat-tracking features bat_speed, swing_length, attack_direction, attack_angle, swing_path_tilt, intercept_ball_minus_batter_pos_x_inches, and intercept_ball_minus_batter_pos_y_inches.
+- Uses time-based split where training observations occur between July 14, 2023, and December 31, 2024, and testing observations occur on or after January 1, 2025.
+- Applies preprocessing pipelines including imputation, scaling of numeric features, and one-hot encoding for categorical features.
+- Uses a fixed threshold of 0.50 for predicted hits.
+- Serves as the bat-tracking model for feature comparison experiments.
+
+Run this script after implementation of the baseline logistic regression model.
 
 A/B Feature Experimental Comparison
 ==
-Feature comparison handled by `tracking_era_model_comparison.py`
+Feature comparison handled by `baseline_vs_bat_tracking_comparison.py`
 - Uses time-based splits to create training and testing DataFrames
 - Observations between July 14, 2023, and December 31, 2024 (inclusive) are used to create training DataFrame.
 - Observations on or after January 1, 2025, are used to create testing DataFrame.
@@ -73,3 +94,19 @@ Feature comparison handled by `tracking_era_model_comparison.py`
 - Produces summary table directly comparing models based on predicted hits at fixed threshold, Accuracy, Precision, Recall, Specificity, F1, ROC AUC, and Average Precision.
 
 Run this script after implementing and validating baseline models.
+
+Feature Experiment Summary
+==
+**Experiment Goal:**<br> 
+Determine whether the inclusion of bat-tracking features provides meaningful improvement in estimating hit probability compared to baseline Statcast features when using a logistic regression model with identical preprocessing and modeling pipelines.
+
+**Ranking Performance:**<br> 
+Model B produced an ROC AUC value of .766399 compared to model A’s ROC AUC of .766662. Therefore, when it comes to assigning probabilities, if we randomly select a hit and a non-hit, both models will assign a higher probability to the hit than the non-hit roughly 77% of the time. As a result, both models are near identical and discriminate between classes (hit versus non-hit) well. 
+Of note, model B produced a higher average precision value of .594423 compared to model A’s .591399. Ultimately, this difference is negligible but conveys model B may have ranked a few hits higher than non-hits compared to model A.
+
+**Threshold Behavior:**<br> 
+Model B and model A both shared a fixed threshold of 0.50 with batted ball events being classified as hits whenever predicted probabilities were greater than or equal to 0.50 and classified as non-hits whenever predicted probabilities fell below 0.50. Ultimately, both models were quite conservative with model B producing a predicted hit rate of .207187 compared to model A’s predicted hit rate of .211176. In other words, model B predicted 20.7% of all batted ball events would result in a hit while model A predicted 21.1%, suggesting both models are quite conservative at the 0.50 threshold. Interestingly, model B had a higher precision of .621211 compared to model A’s .618198, yet model A had a recall of .412276 compared to model B’s .406459 showcasing the precision recall tradeoff. Because model B was a tad more selective when predicting hits, it could predict less false positives (non-hit predicted as hit). However, because it is more selective it also doesn’t predict hits as often leading to more false negatives (hit predicted as non-hit) leading to a lower recall rate. 
+Furthermore, both models were trained and tested on unbalanced data with respective hit rates of .319 and .317. This imbalance could lead to model accuracy being misleading. To account for this imbalance F1 scores were calculated and again model A edged out model B (.494662 to .491397) confirming the inclusion of bat-tracking metrics led to no meaningful improvement in precision or recall.
+
+**Conclusion:**<br> 
+All core evaluation metrics confirm the inclusion of bat-tracking features did not lead to any meaningful improvements in batted ball event hit prediction capabilities. In fact, because the evaluation metrics between the two models were near identical this suggests that the baseline Statcast contact metrics up to the point of contact captured a lot of the same variation captured by bat-tracking metrics. This is sensible because features such as launch_speed and launch_angle are contact dependent. In the causal timeline of events, a hit is preceded by contact and contact is preceded by a swing. Therefore, features which capture swing mechanics will be captured by contact physics. Although predictive capabilities were not improved, it would be wrong to suggest bat-tracking features are useless. Instead, the results suggest this project is not the right instance to utilize bat-tracking metrics but if the future work aimed to predict launch_speed, then I believe bat-tracking features used would shine and be of great use. Ultimately, it can be concluded that bat-tracking features provide no meaningful improvement in estimating hit probabilities.

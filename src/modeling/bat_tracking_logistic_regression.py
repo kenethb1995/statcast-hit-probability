@@ -1,9 +1,18 @@
 """
-This script should be quite similar to baseline_logistic_regression.py just includes tracking era variable.
-Tracking-Era Date Range: Will be first date that tracking variables are available
-Training Dates: 2023-07-14 - 2024-12-31
-Testing Dates: 2025-01-01 - 2025-12-31
+1.Purpose: This script produces a logistic regression model using baseline contact variables with the added inclusion
+of bat-tracking metrics which were first recorded on July 14, 2023, serving as a comparison model to inspect
+whether newly included bat-tracking metrics improve hit prediction capability.
+
+2.Scope: Utilizes time-based split for creation of training/testing DataFrames. Training and Testing DataFrames consist
+of observations recorded once bat-tracking metrics were implemented. Training observations occur between July 14, 2023,
+and December 31, 2024, and testing observations occur on or after January 1, 2025. Applies preprocessing pipelines
+including imputation, scaling, and encoding prior to logistic regression training.
+
+3.Non-Goal: Does not aim to provide the best model possible. No threshold optimization or hyperparameter tuning.
+
+4.Usage: Run after implementing baseline_logistic_regression.py and prior to baseline_vs_bat_tracking_comparison.py.
 """
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.compose import ColumnTransformer

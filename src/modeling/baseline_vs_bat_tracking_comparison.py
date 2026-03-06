@@ -1,11 +1,12 @@
 """
-1. Purpose: This script serves as a controlled A/B feature evaluation comparing tracking-era bat metrics versus
+1.Purpose: This script serves as a controlled A/B feature evaluation comparing tracking-era bat metrics versus
 baseline contact metrics under identical preprocessing and splits.
-2. Scope: Ensures experimental validity by utilizing time-based splits and shared pipeline configuration. Also
+2.Scope: Ensures experimental validity by utilizing time-based splits and shared pipeline configuration. Also
 ensures both models receive identical rows by omitting observations with missing values in all variables used.
-3. Non-Goal: This script does not perform hyperparameter tuning, threshold optimization, feature engineering,
+3.Non-Goal: This script does not perform hyperparameter tuning, threshold optimization, feature engineering,
 or model selection.
-4. Usage: This script should be run after baseline models have been implemented and validated.
+4.Usage: This script should be run after baseline_logistic_regression.py and bat_tracking_logistic_regression.py have
+been implemented and validated.
 """
 
 import pandas as pd
