@@ -96,10 +96,10 @@ if __name__ == "__main__":
     print(f"Rate of BBE Events Classified As Hits @.50 Threshold : {(pred_proba_track >= .50).mean().round(3)}")
 
     #confusion matrix
-    cm = confusion_matrix(y_true=y_test_track, y_pred=predictions_track)
-    class_labels = ['Not Hit', 'Hit']
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_labels)
-    disp.plot(cmap=plt.cm.Blues, values_format='d')
+    #cm = confusion_matrix(y_true=y_test_track, y_pred=predictions_track)
+    #class_labels = ['Not Hit', 'Hit']
+    #disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_labels)
+    #disp.plot(cmap=plt.cm.Blues, values_format='d')
     #plt.show()
 
     # relevant model performance metrics
@@ -114,5 +114,8 @@ if __name__ == "__main__":
     print(f"Accuracy: {round(accuracy_track, 3)}\nPrecision: {round(precision_track, 3)}\nRecall: {round(recall_track, 3)}\n"
           f"Specificity: {round(specificity_track, 3)}\nF1: {round(f1_track, 3)}\nROC AUC: {round(roc_auc_track, 3)}\n"
           f"Average Precision: {round(ap_score_track, 3)}")
+
+
+
 
 

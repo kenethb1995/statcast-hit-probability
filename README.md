@@ -1,6 +1,29 @@
-Model will answer one precise question:
-At the moment of contact, based only on information available then,
-what is the probability this batted ball becomes a hit?
+Project Overview
+==
+**Introduction:**<br>
+This project predicts the probability that a batted-ball event results in a hit using Statcast data available at the moment of contact. Understanding these probabilities helps teams evaluate player performance and identify which metrics drive successful outcomes. 
+
+**Scope:**<br>
+Using MLB Statcast data spanning 5 seasons, I focus on batted-ball characteristics such as launch speed, launch angle, and batted-ball type, along with pitch location and pitcher and batter handedness.
+
+**Approach:**<br>
+I built a baseline logistic regression model to estimate hit probabilities and to assess the contribution of bat-tracking features to predictive performance.
+
+**Takeaways:**<br>
+Results show that contact physics dominate the model's predictive power, while bat-tracking metrics only provide minimal additional value.  
+
+ETL Overview
+==
+ETL consists of three main scripts:
+
+-`pull_statcast.py`: Pulls raw Statcast data from the MLB API and stores it locally in staging area.
+
+-`load_batted_balls.py`: Loads and cleans raw batted-ball data into the PostgreSQL database.
+
+-`db.py`: Handles database connections and utility functions across the ETL pipeline.
+
+Together, these scripts produce a clean, reproducible slice of data which are fed into QA checks and the predictive modeling pipeline. 
+
 
 Schema (Table Creation)
 ==
@@ -33,7 +56,7 @@ The extract is incorporated in `sql/modeling_extract.sql`
 - Filters observations to ensure only domestic regular season games between 2021-2025 are present.
 - Omits the variables hc_x, hc_y, and hit_distance_sc as they are captured post-contact.
 - Omits the variable zone as it is captured by continuous variables plate_x and plate_z.
-- Omits the variable events as it encodes the outcome of each batted ball event.
+- Omits the variable events as it encodes the outcome of each batted-ball event.
 - Removes entire row if either launch_speed or launch_angle are null.
 - Retains observations with null values in all other columns.
 - Does not create train/test splits
@@ -91,7 +114,7 @@ Feature comparison handled by `baseline_vs_bat_tracking_comparison.py`
 - Both models receive identical rows by omitting observations with missing values across any features used in the comparison.
 - Predicted hits are determined using a fixed threshold of 0.50.
 - Does not handle feature engineering, threshold optimization, hyperparameter tuning, or model selection.
-- Produces summary table directly comparing models based on predicted hits at fixed threshold, Accuracy, Precision, Recall, Specificity, F1, ROC AUC, and Average Precision.
+- Produces summary table directly comparing models based on predicted hits at fixed threshold using Accuracy, Precision, Recall, Specificity, F1, ROC AUC, and Average Precision.
 
 Run this script after implementing and validating baseline models.
 
@@ -110,3 +133,94 @@ Furthermore, both models were trained and tested on unbalanced data with respect
 
 **Conclusion:**<br> 
 All core evaluation metrics confirm the inclusion of bat-tracking features did not lead to any meaningful improvements in batted ball event hit prediction capabilities. In fact, because the evaluation metrics between the two models were near identical this suggests that the baseline Statcast contact metrics up to the point of contact captured a lot of the same variation captured by bat-tracking metrics. This is sensible because features such as launch_speed and launch_angle are contact dependent. In the causal timeline of events, a hit is preceded by contact and contact is preceded by a swing. Therefore, features which capture swing mechanics will be captured by contact physics. Although predictive capabilities were not improved, it would be wrong to suggest bat-tracking features are useless. Instead, the results suggest this project is not the right instance to utilize bat-tracking metrics but if the future work aimed to predict launch_speed, then I believe bat-tracking features used would shine and be of great use. Ultimately, it can be concluded that bat-tracking features provide no meaningful improvement in estimating hit probabilities.
+
+Results
+==
+Since bat-tracking features did not meaningfully improve model performance, all results and interpretations will be based on the baseline logistic regression model crafted in `baseline_logistic_regression.py`. <br><br>
+**What Coefficients Mean:**<br>
+Training a logistic regression model produces an estimated coefficient for each feature used. Each coefficient represents the change in log-odds of a hit associated with a feature, holding all other variables constant.
+<br><br>
+For numeric features, a one-unit change typically represents the change in log-odds for a one-unit change in the feature. However, scaling was applied to each numeric feature prior to fitting the model, transforming them to have a mean of 0 and a standard deviation of 1. As a result, coefficients now represent the change in log-odds for a one standard deviation change in the feature.
+<br><br>
+For categorical features, one-hot encoding was applied prior to modeling. This required selecting a reference category which is then dropped during preprocessing. Coefficients are then produced for the remaining categories within a categorical feature which now represent the change in log-odds relative to the reference category. 
+
+Since coefficients are expressed in log-odds, it is common to exponentiate them to ease interpretation. The exponentiated coefficients represent odds ratios. 
+<br><br>
+**Coefficient Insights:**<br>
+Numeric Features:<br>
+Numeric features can be grouped into two categories:<br>
+-	Contact Physics: `launch_speed`, `launch_angle`
+-	Pitch Location: `plate_x`, `	plate_z`<br>
+
+Among numeric features, launch_speed is the strongest numeric predictor of a hit.<br>
+-	Launch Speed Coefficient: 0.479947
+-	Odds Ratio: 1.615989
+
+Therefore, a one standard deviation increase in launch speed will increase the odds of a hit by about 62%. <br>
+
+For context, prior to scaling the training standard deviation for launch speed was 14.97 mph. Meaning this effect corresponds to a significant increase in exit velocity.
+This result aligns with baseball intuition as a harder hit ball reduces defensive reaction time, limiting an opposing team's ability to record an out.<br>
+
+This relationship between launch speed and launch angles, and hit outcomes is illustrated below.
+
+![](outputs/figures/Batted_Ball_Outcomes_by_Launch_Speed_and_Angle.png)
+
+Categorical Features:<br>
+Categorical features can be grouped into two categories:
+
+- Handedness:`stand`, `p_throws`
+- Batted-ball type: `bb_type`
+
+Reference categories were set to right-handed batter, right-handed pitcher, and ground ball.
+
+Handedness features offered little insight with coefficients near zero, indicating handedness has little effect on the odds of a hit relative to their reference category. Similar to bat-tracking metrics, this effect is likely absorbed by contact physics (launch speed and launch angle), which more directly determine batted ball outcomes at contact.
+
+In contrast, batted-ball type produced the strongest categorical effects in the model.<br>
+
+Line Drive<br>
+-	Coefficient: 1.626879
+-	Odds Ratio: 5.087972
+
+Line drives increase hit odds by more than 5x compared to ground balls.<br>
+
+Fly Ball<br>
+-	Coefficient: 0.187963
+-	Odds Ratio: 1.206789
+
+Fly balls increase the odds of a hit by roughly 20% compared to a ground ball.<br>
+
+Popup<br>
+-	Coefficient: -2.286169
+-	Odds Ratio: 0.101655
+
+Popups significantly reduce the odds of a hit by nearly 90% compared to ground balls.
+
+The differences in hit probability across batted-ball types are shown below.
+
+![](outputs/figures/Hit_Probability_by_Batted_Ball_Type.png)
+
+These results all align with baseball intuition. A line drive is a batted ball with optimal launch_speed and launch_angle (hard-hit with low trajectory) making them difficult to field. Meanwhile, a popup is the result of a batted-ball being sent nearly 90 degrees straight up giving fielders ample time to position themselves and secure an out.<br>
+
+Overall, launch speed and batted-ball type account for most of the model's predictive power.
+
+The relative impact and direction of model coefficients for features are summarized below.
+
+![](outputs/figures/Coefficient_Impact_on_Hit_Probability.png)
+
+**Model Performance**<br>
+Model performance is summarized by the ROC curve below.
+
+![](outputs/figures/ROC_Curve_Baseline_Logistic_Regression.png)
+
+Limitations
+==
+- Logistic regression was chosen for interpretability rather than to maximize predictive performance.
+- Batted-ball type is a derived feature based on launch speed and launch angle, which some may argue is technically post-contact.
+- Complex nonlinear interactions and higher order terms were not modeled in order to maintain interpretability.
+
+Future Work
+==
+- Explore more complex models such as gradient boosting and support vector machines to capture nonlinear interactions.
+- Incorporate defensive positioning prior to pitch.
+- Account for ballpark factors on hit probability.
+

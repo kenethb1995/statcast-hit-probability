@@ -1,3 +1,6 @@
+"""
+Load Statcast batted-ball events into Postgres, skipping days already loaded.
+"""
 
 from sqlalchemy import text
 from .db import get_engine, get_schema
