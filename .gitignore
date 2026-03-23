@@ -1,0 +1,24 @@
+# Python cache and temp files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env
+.env.*
+
+# Jupyter / notebooks
+.ipynb_checkpoints/
+
+# Data / outputs (if large or regenerable)
+data/
+outputs/
+*.csv
+*.pkl
+
+# IDE / system files
+*.DS_Store
+*.idea/
+*.vscode/
