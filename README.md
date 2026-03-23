@@ -181,7 +181,7 @@ This result aligns with baseball intuition as a harder hit ball reduces defensiv
 
 This relationship between launch speed and launch angles, and hit outcomes is illustrated below.
 
-![](outputs/figures/Batted_Ball_Outcomes_by_Launch_Speed_and_Angle.png)
+![Launch Speed vs Angle](outputs_example/Batted_Ball_Outcomes_by_Launch_Speed_and_Angle.png)
 
 Categorical Features:<br>
 Categorical features can be grouped into two categories:
@@ -215,7 +215,7 @@ Popups significantly reduce the odds of a hit by nearly 90% compared to ground b
 
 The differences in hit probability across batted-ball types are shown below.
 
-![](outputs/figures/Hit_Probability_by_Batted_Ball_Type.png)
+![Hit Probability by BB Type](outputs_example/Hit_Probability_by_Batted_Ball_Type.png)
 
 These results all align with baseball intuition. A line drive is a batted ball with optimal launch_speed and launch_angle (hard-hit with low trajectory) making them difficult to field. Meanwhile, a popup is the result of a batted-ball being sent nearly 90 degrees straight up giving fielders ample time to position themselves and secure an out.<br>
 
@@ -223,12 +223,12 @@ Overall, launch speed and batted-ball type account for most of the model's predi
 
 The relative impact and direction of model coefficients for features are summarized below.
 
-![](outputs/figures/Coefficient_Impact_on_Hit_Probability.png)
+![Coefficient Impact](outputs_example/Coefficient_Impact_on_Hit_Probability.png)
 
 **Model Performance**<br>
 Model performance is summarized by the ROC curve below.
 
-![](outputs/figures/ROC_Curve_Baseline_Logistic_Regression.png)
+![ROC Curve](outputs_example/ROC_Curve_Baseline_Logistic_Regression.png)
 
 Limitations
 ==
