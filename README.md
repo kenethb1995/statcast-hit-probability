@@ -12,6 +12,21 @@ I built a baseline logistic regression model to estimate hit probabilities and t
 **Takeaways:**<br>
 Results show that contact physics dominate the model's predictive power, while bat-tracking metrics only provide minimal additional value.  
 
+Setup/Running the Project
+==
+This project requires a PostgreSQL database for some scripts (ETL and Modeling) and uses environment variables for credentials.
+
+1. Create a `.env` file in the project root with your database settings:
+DB_NAME=your_db_name
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_HOST=localhost
+DB_PORT=5432
+DB_SCHEMA=public
+2. Run Scripts
+- Non-DB-dependent scripts(e.g., pull_statcast.py) can be run immediately.
+- DB-dependent scripts will skip operations if credentials are missing, allowing the rest of the project to be explored.
+
 ETL Overview
 ==
 ETL consists of three main scripts:
