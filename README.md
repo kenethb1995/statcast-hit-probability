@@ -12,23 +12,28 @@ I built a baseline logistic regression model to estimate hit probabilities and t
 **Takeaways:**<br>
 Results show that contact physics dominate the model's predictive power, while bat-tracking metrics only provide minimal additional value.  
 
-Setup/Running the Project
+Setup - Running the Project
 ==
-This project requires a PostgreSQL database for some scripts (ETL and Modeling) and uses environment variables for credentials.
+This project is built around a PostgreSQL database and uses environment variables for credentials.
 
-1. Create a `.env` file in the project root with your database settings:<br><br>
+1. Configure Environment Variables
 
-    DB_NAME=your_db_name<br>
-    DB_USER=your_db_user<br>
-    DB_PASSWORD=your_db_password<br>
-    DB_HOST=localhost<br>
-    DB_PORT=5432<br>
-    DB_SCHEMA=public<br>
-<br>
+Create a `.env` file in the project root with your database settings:
+
+   - DB_NAME=your_db_name<br>
+   - DB_USER=your_db_user<br>
+   - DB_PASSWORD=your_db_password<br>
+   - DB_HOST=localhost<br>
+   - DB_PORT=5432<br>
+   - DB_SCHEMA=public
+
 2. Run Scripts
 
-- Non-DB-dependent scripts(e.g., pull_statcast.py) can be run immediately.
-- DB-dependent scripts will skip operations if credentials are missing, allowing the rest of the project to be explored.
+- Most scripts in this project (ETL, data extraction, and modeling) **require a configured database connection** and will not run without valid `.env` credentials.
+- `pull_statcast.py` can be run independently to retrieve raw Statcast data.
+
+For users without database access, example outputs (plots and figures) are provided in the `outputs_example/` folder and are referenced throughout this README.
+These outputs illustrate the results of the modeling and analysis without requiring execution of the full pipeline.
 
 ETL Overview
 ==
